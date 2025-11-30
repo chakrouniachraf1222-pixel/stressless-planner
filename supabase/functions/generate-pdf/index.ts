@@ -10,7 +10,7 @@ interface Subject {
   id: string;
   name: string;
   deadline: string;
-  weight: number;
+  studyHours: number;
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
@@ -147,7 +147,7 @@ function generateHTMLContent(subjects: Subject[], studyHours: number, weeklyPlan
   ${subjects.map(subject => `
     <div class="deadline-item">
       <strong>${subject.name}</strong> - Deadline: ${new Date(subject.deadline).toLocaleDateString('nl-NL')}
-      <br>Gewicht: ${subject.weight}% | Moeilijkheid: ${getDifficultyLabel(subject.difficulty)}
+      <br>Studie-uren: ${subject.studyHours} uur | Moeilijkheid: ${getDifficultyLabel(subject.difficulty)}
     </div>
   `).join('')}
 
