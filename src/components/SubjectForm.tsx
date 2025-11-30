@@ -19,6 +19,13 @@ export const SubjectForm = ({ onAdd, subjects, onRemove }: SubjectFormProps) => 
   const [weight, setWeight] = useState(50);
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
 
+  // Get tomorrow's date as minimum deadline
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !deadline) return;
@@ -64,8 +71,10 @@ export const SubjectForm = ({ onAdd, subjects, onRemove }: SubjectFormProps) => 
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
+              min={getTomorrowDate()}
               required
             />
+            <p className="text-xs text-muted-foreground">Je kunt alleen plannen vanaf morgen</p>
           </div>
 
           <div className="space-y-2">
