@@ -50,15 +50,10 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
         return deadline >= currentDate && deadline <= weekEnd;
       });
 
-      // Calculate stress score
-      let requiredHours = 0;
-      deadlinesThisWeek.forEach(subject => {
-        const baseHours = subject.weight / 10; // 10% = 1 hour base
-        const difficultyMultiplier = 
-          subject.difficulty === "easy" ? 1 : 
-          subject.difficulty === "medium" ? 1.5 : 2;
-        requiredHours += baseHours * difficultyMultiplier;
-      });
+      // Calculate stress score based on study hours
+      const requiredHours = deadlinesThisWeek.reduce((total, subject) => {
+        return total + subject.studyHours;
+      }, 0);
 
       const stressScore = Math.min(10, Math.round((requiredHours / studyHours) * 10));
       const stressLevel: "low" | "medium" | "high" = 

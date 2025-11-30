@@ -11,7 +11,7 @@ export interface Subject {
   id: string;
   name: string;
   deadline: string;
-  weight: number;
+  studyHours: number;
   difficulty: "easy" | "medium" | "hard";
 }
 
@@ -26,6 +26,10 @@ const Index = () => {
 
   const handleRemoveSubject = (id: string) => {
     setSubjects(subjects.filter(s => s.id !== id));
+  };
+
+  const handleEditSubject = (id: string, updatedSubject: Omit<Subject, "id">) => {
+    setSubjects(subjects.map(s => s.id === id ? { ...updatedSubject, id } : s));
   };
 
   const handleGeneratePlanning = () => {
@@ -121,6 +125,7 @@ const Index = () => {
                   onAdd={handleAddSubject} 
                   subjects={subjects}
                   onRemove={handleRemoveSubject}
+                  onEdit={handleEditSubject}
                 />
                 
                 {subjects.length > 0 && (
