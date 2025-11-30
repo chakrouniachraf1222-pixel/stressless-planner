@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, AlertTriangle, CheckCircle2, Download } from "lucide-react";
 import { Subject } from "@/pages/Index";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PlanningResultsProps {
   subjects: Subject[];
@@ -23,6 +25,8 @@ interface WeekData {
 }
 
 export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResultsProps) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const weeklyPlanning = useMemo(() => {
     if (subjects.length === 0) return [];
 
@@ -97,6 +101,48 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
       : <AlertTriangle className="w-4 h-4" />;
   };
 
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true);
+    try {
+      // Transform weeklyPlanning to match edge function interface
+      const transformedPlanning = weeklyPlanning.map(week => ({
+        week: week.weekNumber,
+        startDate: week.startDate.toLocaleDateString('nl-NL'),
+        endDate: week.endDate.toLocaleDateString('nl-NL'),
+        deadlines: week.deadlines,
+        stressLevel: week.stressLevel,
+        stressScore: week.stressScore,
+        requiredHours: week.requiredHours,
+        tasks: week.tasks
+      }));
+
+      const { data, error } = await supabase.functions.invoke('generate-pdf', {
+        body: { subjects, studyHours, weeklyPlanning: transformedPlanning }
+      });
+
+      if (error) throw error;
+
+      // Create a new window with the HTML content
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(data.html);
+        printWindow.document.close();
+        
+        // Wait for content to load then trigger print
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+
+      toast.success("PDF wordt gegenereerd! Gebruik de print functie om op te slaan als PDF.");
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error("Fout bij het genereren van de PDF. Probeer het opnieuw.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const totalDeadlines = subjects.length;
   const averageStress = weeklyPlanning.length > 0 
     ? (weeklyPlanning.reduce((sum, w) => sum + w.stressScore, 0) / weeklyPlanning.length).toFixed(1)
@@ -110,9 +156,14 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
           <ArrowLeft className="w-4 h-4" />
           Terug naar planning
         </Button>
-        <Button variant="outline" className="gap-2">
+        <Button 
+          variant="default" 
+          onClick={handleDownloadPDF}
+          disabled={isDownloading}
+          className="gap-2"
+        >
           <Download className="w-4 h-4" />
-          Premium PDF
+          {isDownloading ? "Genereren..." : "Download PDF"}
         </Button>
       </div>
 
