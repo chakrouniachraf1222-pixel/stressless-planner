@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, AlertTriangle, CheckCircle2, Download } from "lucide-react";
 import { Subject } from "@/pages/Index";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { StressWeatherForecast } from "./StressWeatherForecast";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 interface PlanningResultsProps {
   subjects: Subject[];
   studyHours: number;
@@ -96,40 +97,54 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
       : <AlertTriangle className="w-4 h-4" />;
   };
 
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const handleDownloadPDF = async () => {
+    if (!contentRef.current) return;
+    
     setIsDownloading(true);
     try {
-      // Transform weeklyPlanning to match edge function interface
-      const transformedPlanning = weeklyPlanning.map(week => ({
-        week: week.weekNumber,
-        startDate: week.startDate.toLocaleDateString('nl-NL'),
-        endDate: week.endDate.toLocaleDateString('nl-NL'),
-        deadlines: week.deadlines,
-        stressLevel: week.stressLevel,
-        stressScore: week.stressScore,
-        requiredHours: week.requiredHours,
-        tasks: week.tasks
-      }));
-
-      const { data, error } = await supabase.functions.invoke('generate-pdf', {
-        body: { subjects, studyHours, weeklyPlanning: transformedPlanning }
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
       });
-
-      if (error) throw error;
-
-      // Create a new window with the HTML content
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(data.html);
-        printWindow.document.close();
-        
-        // Wait for content to load then trigger print
-        printWindow.onload = () => {
-          printWindow.print();
-        };
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      
+      // Calculate how many pages we need
+      const scaledHeight = (imgHeight * pdfWidth) / imgWidth;
+      const pageHeight = pdfHeight;
+      let heightLeft = scaledHeight;
+      let position = 0;
+      
+      // First page
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, scaledHeight);
+      heightLeft -= pageHeight;
+      
+      // Add more pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - scaledHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, scaledHeight);
+        heightLeft -= pageHeight;
       }
-
-      toast.success("PDF wordt gegenereerd! Gebruik de print functie om op te slaan als PDF.");
+      
+      pdf.save('stressless-planning.pdf');
+      toast.success("PDF succesvol gedownload!");
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error("Fout bij het genereren van de PDF. Probeer het opnieuw.");
@@ -146,7 +161,7 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between print:hidden">
         <Button variant="ghost" onClick={onBack} className="gap-2">
           <ArrowLeft className="w-4 h-4" />
           Terug naar planning
@@ -162,11 +177,13 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
         </Button>
       </div>
 
-      {/* Stress Weather Forecast - Unique Feature */}
-      <StressWeatherForecast weeks={weeklyPlanning} />
+      {/* PDF Content - This will be captured */}
+      <div ref={contentRef} className="space-y-6 bg-background p-4 rounded-lg">
+        {/* Stress Weather Forecast - Unique Feature */}
+        <StressWeatherForecast weeks={weeklyPlanning} />
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Overview Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Totaal Deadlines</CardDescription>
@@ -275,6 +292,7 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
           ))}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
