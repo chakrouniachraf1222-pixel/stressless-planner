@@ -6,7 +6,7 @@ import { ArrowLeft, Calendar, AlertTriangle, CheckCircle2, Download } from "luci
 import { Subject } from "@/pages/Index";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
+import { StressWeatherForecast } from "./StressWeatherForecast";
 interface PlanningResultsProps {
   subjects: Subject[];
   studyHours: number;
@@ -161,6 +161,9 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
           {isDownloading ? "Genereren..." : "Download PDF"}
         </Button>
       </div>
+
+      {/* Stress Weather Forecast - Unique Feature */}
+      <StressWeatherForecast weeks={weeklyPlanning} />
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
