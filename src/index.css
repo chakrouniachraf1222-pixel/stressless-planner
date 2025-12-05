@@ -1,4 +1,23 @@
 @tailwind base;
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.5));
+}
 @tailwind components;
 @tailwind utilities;
 
