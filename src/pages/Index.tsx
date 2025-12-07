@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { GraduationCap, Plus, Sparkles, Calendar, Clock } from "lucide-react";
 import { SubjectForm } from "@/components/SubjectForm";
 import { PlanningResults } from "@/components/PlanningResults";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export interface Subject {
   id: string;
@@ -44,14 +45,17 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-primary-foreground">
-              <GraduationCap className="w-6 h-6" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-primary-foreground">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">StressLess Planner</h1>
+                <p className="text-sm text-muted-foreground">AI-powered deadline planning voor studenten</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">StressLess Planner</h1>
-              <p className="text-sm text-muted-foreground">AI-powered deadline planning voor studenten</p>
-            </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -159,6 +163,10 @@ const Index = () => {
             subjects={subjects}
             studyHours={studyHours}
             onBack={() => setShowResults(false)}
+            onRecalculate={() => {
+              // Trigger a re-render by slightly modifying state
+              setStudyHours(prev => prev);
+            }}
           />
         )}
       </main>

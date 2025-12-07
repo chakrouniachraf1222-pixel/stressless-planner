@@ -2,16 +2,18 @@ import { useMemo, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, AlertTriangle, CheckCircle2, Download } from "lucide-react";
+import { ArrowLeft, Calendar, AlertTriangle, CheckCircle2, Download, RefreshCw } from "lucide-react";
 import { Subject } from "@/pages/Index";
 import { toast } from "sonner";
 import { StressWeatherForecast } from "./StressWeatherForecast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+
 interface PlanningResultsProps {
   subjects: Subject[];
   studyHours: number;
   onBack: () => void;
+  onRecalculate: () => void;
 }
 
 interface WeekData {
@@ -25,8 +27,22 @@ interface WeekData {
   tasks: string[];
 }
 
-export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResultsProps) => {
+export const PlanningResults = ({ subjects, studyHours, onBack, onRecalculate }: PlanningResultsProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
+
+  const handleRecalculate = () => {
+    setIsRecalculating(true);
+    // Simulate recalculation with animation
+    setTimeout(() => {
+      onRecalculate();
+      setIsRecalculating(false);
+      toast.success("Planning herberekend! Taken zijn doorgeschoven naar de komende dagen.", {
+        description: "De stress-scores zijn bijgewerkt.",
+        duration: 4000,
+      });
+    }, 800);
+  };
 
   const weeklyPlanning = useMemo(() => {
     if (subjects.length === 0) return [];
@@ -161,20 +177,31 @@ export const PlanningResults = ({ subjects, studyHours, onBack }: PlanningResult
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 print:hidden">
         <Button variant="ghost" onClick={onBack} className="gap-2">
           <ArrowLeft className="w-4 h-4" />
           Terug naar planning
         </Button>
-        <Button 
-          variant="default" 
-          onClick={handleDownloadPDF}
-          disabled={isDownloading}
-          className="gap-2"
-        >
-          <Download className="w-4 h-4" />
-          {isDownloading ? "Genereren..." : "Download PDF"}
-        </Button>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            onClick={handleRecalculate}
+            disabled={isRecalculating}
+            className="gap-2 border-stress-high text-stress-high hover:bg-stress-high hover:text-stress-high-foreground flex-1 sm:flex-none"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRecalculating ? 'animate-spin' : ''}`} />
+            {isRecalculating ? "Herberekenen..." : "Ik loop achter!"}
+          </Button>
+          <Button 
+            variant="default" 
+            onClick={handleDownloadPDF}
+            disabled={isDownloading}
+            className="gap-2 flex-1 sm:flex-none"
+          >
+            <Download className="w-4 h-4" />
+            {isDownloading ? "Genereren..." : "Download PDF"}
+          </Button>
+        </div>
       </div>
 
       {/* PDF Content - This will be captured */}
