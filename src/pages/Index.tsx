@@ -1,40 +1,36 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, Plus, Sparkles, Calendar, Clock, LogOut, Loader2 } from "lucide-react";
+import { GraduationCap, Plus, Sparkles, Calendar, Clock } from "lucide-react";
 import { SubjectForm } from "@/components/SubjectForm";
 import { PlanningResults } from "@/components/PlanningResults";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useAuth } from "@/hooks/useAuth";
-import { useSubjects, Subject } from "@/hooks/useSubjects";
-import { useState } from "react";
-import { toast } from "sonner";
 
-export type { Subject } from "@/hooks/useSubjects";
+export interface Subject {
+  id: string;
+  name: string;
+  deadline: string;
+  studyHours: number;
+  difficulty: "easy" | "medium" | "hard";
+}
 
 const Index = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
-  const { subjects, studyHours, loading: dataLoading, addSubject, updateSubject, removeSubject, setStudyHours } = useSubjects();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [studyHours, setStudyHours] = useState(20);
   const [showResults, setShowResults] = useState(false);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
+  const handleAddSubject = (subject: Omit<Subject, "id">) => {
+    setSubjects([...subjects, { ...subject, id: Math.random().toString() }]);
+  };
 
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error("Kon niet uitloggen");
-    } else {
-      toast.success("Uitgelogd");
-      navigate("/auth");
-    }
+  const handleRemoveSubject = (id: string) => {
+    setSubjects(subjects.filter(s => s.id !== id));
+  };
+
+  const handleEditSubject = (id: string, updatedSubject: Omit<Subject, "id">) => {
+    setSubjects(subjects.map(s => s.id === id ? { ...updatedSubject, id } : s));
   };
 
   const handleGeneratePlanning = () => {
@@ -43,21 +39,6 @@ const Index = () => {
     }
     setShowResults(true);
   };
-
-  if (authLoading || dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/20 to-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Je planning laden...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-background">
@@ -74,12 +55,7 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">AI-powered deadline planning voor studenten</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <Button variant="ghost" size="icon" onClick={handleSignOut} title="Uitloggen">
-                <LogOut className="w-5 h-5" />
-              </Button>
-            </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -150,10 +126,10 @@ const Index = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <SubjectForm 
-                  onAdd={addSubject} 
+                  onAdd={handleAddSubject} 
                   subjects={subjects}
-                  onRemove={removeSubject}
-                  onEdit={updateSubject}
+                  onRemove={handleRemoveSubject}
+                  onEdit={handleEditSubject}
                 />
                 
                 {subjects.length > 0 && (
@@ -188,9 +164,8 @@ const Index = () => {
             studyHours={studyHours}
             onBack={() => setShowResults(false)}
             onRecalculate={() => {
-              // Trigger a re-render
-              setShowResults(false);
-              setTimeout(() => setShowResults(true), 100);
+              // Trigger a re-render by slightly modifying state
+              setStudyHours(prev => prev);
             }}
           />
         )}
