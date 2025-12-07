@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, X, Pencil } from "lucide-react";
-import { Subject } from "@/pages/Index";
+import { Subject } from "@/hooks/useSubjects";
 
 interface SubjectFormProps {
   onAdd: (subject: Omit<Subject, "id">) => void;
