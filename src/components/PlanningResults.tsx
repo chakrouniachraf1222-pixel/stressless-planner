@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, AlertTriangle, CheckCircle2, Download, RefreshCw } from "lucide-react";
-import { Subject } from "@/pages/Index";
+import { Subject } from "@/hooks/useSubjects";
 import { toast } from "sonner";
 import { StressWeatherForecast } from "./StressWeatherForecast";
 import html2canvas from "html2canvas";
