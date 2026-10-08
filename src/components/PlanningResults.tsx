@@ -6,6 +6,7 @@ import { ArrowLeft, Calendar, AlertTriangle, CheckCircle2, Download, RefreshCw }
 import { Subject } from "@/hooks/useSubjects";
 import { toast } from "sonner";
 import { StressWeatherForecast } from "./StressWeatherForecast";
+import { DailyPlanning } from "./DailyPlanning";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -208,6 +209,8 @@ export const PlanningResults = ({ subjects, studyHours, onBack, onRecalculate }:
       <div ref={contentRef} className="space-y-6 bg-background p-4 rounded-lg">
         {/* Stress Weather Forecast - Unique Feature */}
         <StressWeatherForecast weeks={weeklyPlanning} />
+
+        <DailyPlanning subjects={subjects} studyHours={studyHours} />
 
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
