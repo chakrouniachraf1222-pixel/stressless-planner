@@ -2,3 +2,6 @@ project_id = "xlcjjjapctfpmbecgjrk"
 
 [functions.generate-pdf]
 verify_jwt = false
+
+[functions.analyze-subject]
+verify_jwt = false

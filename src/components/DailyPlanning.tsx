@@ -40,6 +40,14 @@ export const DailyPlanning = ({ subjects, studyHours }: Props) => {
       const deadline = startOfDay(new Date(s.deadline));
       if (deadline < today) continue;
       ensure(deadline).deadlines.push(s);
+      if (s.aiPlan?.days?.length) {
+        for (const d of s.aiPlan.days) {
+          const date = startOfDay(new Date(d.date));
+          if (date < today || date >= deadline) continue;
+          ensure(date).tasks.push({ subject: s, hours: d.hours, activity: d.task });
+        }
+        continue;
+      }
       const dayCount = Math.max(1, Math.round((deadline.getTime() - today.getTime()) / 86400000));
       const perDay = s.studyHours / dayCount;
       for (let i = 0; i < dayCount; i++) {

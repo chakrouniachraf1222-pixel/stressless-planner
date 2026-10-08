@@ -9,6 +9,12 @@ export interface Subject {
   deadline: string;
   studyHours: number;
   difficulty: "easy" | "medium" | "hard";
+  aiPlan?: AiPlan | null;
+}
+
+export interface AiPlan {
+  summary: string;
+  days: { date: string; task: string; hours: number }[];
 }
 
 interface DbSubject {
@@ -17,6 +23,7 @@ interface DbSubject {
   deadline: string;
   study_hours: number;
   difficulty: string;
+  ai_plan?: unknown;
 }
 
 export const useSubjects = () => {
@@ -49,6 +56,7 @@ export const useSubjects = () => {
         deadline: s.deadline,
         studyHours: s.study_hours,
         difficulty: s.difficulty as "easy" | "medium" | "hard",
+        aiPlan: (s.ai_plan as AiPlan) ?? null,
       }));
 
       setSubjects(mappedSubjects);
@@ -129,7 +137,7 @@ export const useSubjects = () => {
       if (error) throw error;
 
       setSubjects((prev) =>
-        prev.map((s) => (s.id === id ? { ...subject, id } : s))
+        prev.map((s) => (s.id === id ? { ...s, ...subject, id } : s))
       );
       toast.success("Vak bijgewerkt");
     } catch (error) {

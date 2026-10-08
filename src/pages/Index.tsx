@@ -17,7 +17,7 @@ export type { Subject } from "@/hooks/useSubjects";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { subjects, studyHours, loading: dataLoading, addSubject, updateSubject, removeSubject, setStudyHours } = useSubjects();
+  const { subjects, studyHours, loading: dataLoading, addSubject, updateSubject, removeSubject, setStudyHours, refresh } = useSubjects();
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
 
@@ -154,6 +154,7 @@ const Index = () => {
                   subjects={subjects}
                   onRemove={removeSubject}
                   onEdit={updateSubject}
+                  onRefresh={refresh}
                 />
                 
                 {subjects.length > 0 && (

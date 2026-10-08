@@ -6,15 +6,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, X, Pencil } from "lucide-react";
 import { Subject } from "@/hooks/useSubjects";
+import { SubjectDocuments } from "./SubjectDocuments";
 
 interface SubjectFormProps {
   onAdd: (subject: Omit<Subject, "id">) => void;
   subjects: Subject[];
   onRemove: (id: string) => void;
   onEdit: (id: string, subject: Omit<Subject, "id">) => void;
+  onRefresh?: () => void;
 }
 
-export const SubjectForm = ({ onAdd, subjects, onRemove, onEdit }: SubjectFormProps) => {
+export const SubjectForm = ({ onAdd, subjects, onRemove, onEdit, onRefresh }: SubjectFormProps) => {
   const [name, setName] = useState("");
   const [deadline, setDeadline] = useState("");
   const [studyHours, setStudyHours] = useState(10);
@@ -150,7 +152,8 @@ export const SubjectForm = ({ onAdd, subjects, onRemove, onEdit }: SubjectFormPr
           <h3 className="font-semibold text-sm text-muted-foreground">Toegevoegde vakken:</h3>
           {subjects.map((subject) => (
             <Card key={subject.id}>
-              <CardContent className="flex items-center justify-between p-4">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-semibold">{subject.name}</h4>
@@ -181,6 +184,9 @@ export const SubjectForm = ({ onAdd, subjects, onRemove, onEdit }: SubjectFormPr
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
+                </div>
+                {subject.aiPlan && <p className="text-xs text-primary mt-2">✨ Slimme planning actief</p>}
+                <SubjectDocuments subjectId={subject.id} onPlanned={() => onRefresh?.()} />
               </CardContent>
             </Card>
           ))}
