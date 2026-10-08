@@ -14,8 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      subject_documents: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          storage_path: string
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          storage_path: string
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          storage_path?: string
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_documents_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subjects: {
         Row: {
+          ai_plan: Json | null
           created_at: string
           deadline: string
           difficulty: string
@@ -26,6 +65,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_plan?: Json | null
           created_at?: string
           deadline: string
           difficulty?: string
@@ -36,6 +76,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_plan?: Json | null
           created_at?: string
           deadline?: string
           difficulty?: string
